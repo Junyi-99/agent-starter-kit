@@ -1,0 +1,32 @@
+[project]
+name = "agent-starter-kit"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Junyi Hou", email = "hji200914@gmail.com" }
+]
+requires-python = ">=3.13"
+dependencies = [
+    "beautifulsoup4>=4.13.3", # crawler
+    "crawl4ai>=0.4.248",
+    "langfuse>=2.59.1", # crawler
+    "loguru>=0.7.3", # better logging
+    "lxml>=5.3.0",
+    "lxml-stubs>=0.5.1",
+    "pymupdf>=1.25.3", # extract references
+    "rich>=13.9.4", # better printing
+]
+
+[[tool.mypy.overrides]]
+module = ["crawl4ai.*", "langfuse.*", "pymupdf.*"]
+ignore_missing_imports = true
+
+
+[project.scripts]
+agent-starter-kit = "agent_starter_kit:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
