@@ -5,5 +5,6 @@ This is a starter kit for building agents. It is a collection of tools and utili
 ## Installation
 
 ```bash
-uv run main.py
+uv run playwright install
+uv run python main.py
 ```

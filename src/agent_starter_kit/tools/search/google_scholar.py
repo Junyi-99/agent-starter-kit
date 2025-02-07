@@ -150,9 +150,7 @@ class GoogleScholarSearchEngine(SearchEngine):
     async def search(self, query: str, year_from: int | None = None, year_to: int | None = None, offset: int | None = None, limit: int | None = None) -> list[PaperSearchResult]:
         if limit is not None:
             warnings.warn("The limit is not supported for Google Scholar search engine", UserWarning)
-        
-        result = asyncio.run(self._search(query, year_from, year_to, offset, limit))
-        return result
+        return await self._search(query, year_from, year_to, offset, limit)
 
 
 async def get_search_result_googlescholar(keyword: str, page: int) -> list[PaperSearchResult]:
