@@ -6,7 +6,7 @@ readme = "README.md"
 authors = [
     { name = "Junyi Hou", email = "hji200914@gmail.com" }
 ]
-requires-python = ">=3.13"
+requires-python = ">=3.12"
 dependencies = [
     "beautifulsoup4>=4.13.3", # crawler
     "crawl4ai>=0.4.248",

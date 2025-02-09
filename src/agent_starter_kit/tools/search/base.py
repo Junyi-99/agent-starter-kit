@@ -10,7 +10,7 @@ class Author:
     dblp_id: str | None = None
     orcid_id: str | None = None
     affiliation: str | None = None
-
+    homepage: str | None = None
     def __str__(self):
         return self.full_name
 
@@ -21,6 +21,7 @@ class Author:
             "dblp_id": self.dblp_id,
             "orcid_id": self.orcid_id,
             "affiliation": self.affiliation,
+            "homepage": self.homepage,
         }
     
     def to_json(self) -> str:

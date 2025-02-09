@@ -1,10 +1,10 @@
 import asyncio
 import warnings
-
+import requests
 from bs4 import BeautifulSoup, Tag
-from crawl4ai import AsyncWebCrawler, CacheMode
+from crawl4ai import AsyncWebCrawler, CacheMode, CrawlerRunConfig, BrowserConfig
 from crawl4ai.chunking_strategy import RegexChunking
-from lxml import html
+from lxml import html, etree
 from rich import print
 
 from .base import Author, PaperSearchResult, SearchEngine
@@ -16,7 +16,10 @@ def parse_google_scholar_html(html_content: str) -> list[PaperSearchResult]:
 
     body = soup.find(id="gs_res_ccl_mid")
     if body is None or not isinstance(body, Tag):
-        raise ValueError("Cannot find the body tag of the google scholar search result")
+        if "not a robot" in html_content:
+            raise ValueError("Google Scholar is blocking the request")
+        else:
+            raise ValueError("Cannot find the body tag of the google scholar search result")
     
     # Get all children of the body
     children = body.find_all("div", recursive=False)
@@ -57,13 +60,34 @@ def parse_google_scholar_html(html_content: str) -> list[PaperSearchResult]:
             venue_name = venue[0] if len(venue) > 0 else None # type: ignore
             venue_url = venue[1] if len(venue) > 1 else None # type: ignore
             
-            print(venue)
             venue_name, year = venue_name.split(",") if venue_name is not None else (None, None) # type: ignore
             venue_name = " ".join(venue_name.split()) if venue_name is not None else None # type: ignore # remove the \xa0 in the string
             year = int(year) if year is not None else None
             
             authors = tree.xpath("//div[@class='gs_fmaa']")
             if len(authors) > 0: # type: ignore
+                authors_source = etree.tostring(authors[0]).decode("utf-8") # type: ignore
+                
+                authors = authors_source.split(",") # split the html string by comma
+                
+                for author in authors:
+                    author_html = html.fromstring(author) # type: ignore
+                    author_name = author_html.xpath("//text()")[0] # type: ignore
+                    author_id = author_html.xpath("//a/@href")[0] # type: ignore
+                    if author_id is not None:
+                        author_id = author_id.split("user=")[1] # type: ignore
+                        author_id = author_id.split("&")[0] # type: ignore
+                    
+                    authors = [
+                        Author(
+                            full_name= author_name,
+                            google_scholar_id=author_id
+                    )
+                    for author in authors
+                ]
+                
+                
+                
                 authors = authors[0].text_content() # type: ignore
                 authors = " ".join(authors.split()) # type: ignore
                 authors = authors.split(",") # type: ignore
@@ -109,6 +133,14 @@ def parse_google_scholar_html(html_content: str) -> list[PaperSearchResult]:
     return result
 
 
+def get_next_proxy():
+    ret = requests.get("https://proxypool.scrape.center/random")
+    
+    return {
+        "server": "http://" + ret.content.decode("utf-8"),
+    }
+
+
 class GoogleScholarSearchEngine(SearchEngine):
     """
     Find usage example in `pd-core-latex/demo_search_google_scholar.py`
@@ -135,7 +167,23 @@ class GoogleScholarSearchEngine(SearchEngine):
 
 
     async def _search(self, query: str, year_from: int | None, year_to: int | None, offset: int | None, limit: int | None) -> list[PaperSearchResult]:
-        async with AsyncWebCrawler(verbose=True) as crawler:
+        browser_cfg = BrowserConfig(
+            headless=False,
+            user_agent_mode="random",
+            cookies=[],
+            use_persistent_context=True,
+            browser_type="chromium"
+        )
+        async with AsyncWebCrawler(verbose=True, config=browser_cfg) as crawler:
+            
+            config = CrawlerRunConfig(
+                js_code = [
+                    "let buttons = document.querySelectorAll('a.gs_or_cit');",
+                    "if (buttons.length > 0) {buttons[buttons.length - 1].click();}"
+                ],
+                proxy_config=get_next_proxy(),
+            )
+            
             result = await crawler.arun(
                 url=self._get_url(query, offset, year_from, year_to),
                 cache_mode=CacheMode.BYPASS,
@@ -143,6 +191,7 @@ class GoogleScholarSearchEngine(SearchEngine):
                 override_navigator=True,  # Makes the browser appear more like a real user
                 remove_overlay_elements=True,
                 chunking_strategy=RegexChunking(patterns=["\n\n"]),
+                config=config,
             )
             assert result.html.strip() != '', 'The result is empty'
             return parse_google_scholar_html(result.html)
