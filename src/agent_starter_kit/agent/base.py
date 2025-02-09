@@ -107,6 +107,3 @@ class Agent(ABC):
         self.trace.update(output=output)  # update the trace with the final output
         trace_generate.update(output=output, end_time=datetime.now())
         return output
-
-    def __del__(self):
-        self.langfuse.flush()
