@@ -8,8 +8,8 @@ from datetime import datetime
 from collections.abc import Callable
 
 class CacheInterface(Protocol):
-    def get(self, key: str) -> Optional[Any]: ...
-    def set(self, key: str, value: Any, args: tuple | None = None, kwargs: dict | None = None) -> None: ...
+    def get(self, func_name: str, args: tuple | None = None, kwargs: dict | None = None) -> Optional[Any]: ...
+    def set(self, func_name: str, args: tuple | None = None, kwargs: dict | None = None, return_value: Any = None) -> None: ...
 
 
 @dataclass
@@ -47,41 +47,42 @@ class CacheManager:
         self._save_input = save_input
         os.makedirs(cache_dir, exist_ok=True)
 
-    def get_cache_path(self, key: str) -> str:
-        return os.path.join(self._cache_dir, f"{key}.json")
+    def get_cache_path(self, func_name: str, args: tuple | None = None, kwargs: dict | None = None) -> str:
+        sha = sha256((str(args) + str(kwargs)).encode('utf-8')).hexdigest()
+        return os.path.join(self._cache_dir, func_name, f"{sha}.json")
 
-    def get(self, key: str) -> Optional[Any]:
-        path = self.get_cache_path(key)
+    def get(self, func_name: str, args: tuple | None, kwargs: dict | None) -> Optional[Any]:
+        path = self.get_cache_path(func_name, args, kwargs)
         if os.path.exists(path):
             with open(path, 'r') as f:
                 data = json.load(f)
                 return data['result']
         return None
 
-    def set(self, key: str, value: Any, args: tuple | None = None, kwargs: dict | None = None) -> None:
-        path = self.get_cache_path(key)
+    def set(self, func_name: str, args: tuple | None = None, kwargs: dict | None = None, return_value: Any = None) -> None:
+        path = self.get_cache_path(func_name, args, kwargs)
         cache_entry = CacheEntry(
-            result=value,
+            result=return_value,
             args=args if self._save_input else "save_input=False",
             kwargs=kwargs if self._save_input else "save_input=False"
         )
+        
+        folder = os.path.dirname(path)
+        os.makedirs(folder, exist_ok=True)
+        
         with open(path, 'w') as f:
             json.dump(cache_entry.to_dict(), f, indent=4)
 
     def clear(self) -> None:
         """Clear all cache files"""
-        for f in os.listdir(self._cache_dir):
-            if f.endswith('.json'):
-                os.remove(os.path.join(self._cache_dir, f))
+        os.rmdir(self._cache_dir)
 
-
-def cached[F: Callable[..., Any]](provider: CacheInterface = CacheManager(), prefix: str = "") -> Callable[[F], F]:
+def cached[F: Callable[..., Any]](provider: CacheInterface = CacheManager()) -> Callable[[F], F]:
     """
     Decorator that caches function results in JSON files. The cache key is generated from the function name and argument values.
 
     Args:
         provider (CacheInterface): The cache manager to use. default: CacheManager()
-        prefix (str): The prefix to use for the cache file names. default: ""
 
     Usage:
     @cached(provider=CacheManager(), prefix="myapp")
@@ -96,14 +97,11 @@ def cached[F: Callable[..., Any]](provider: CacheInterface = CacheManager(), pre
         @wraps(func)
         def wrapper(*args, **kwargs):
             # Get cache manager from first arg (self) if it exists
-            sha = sha256((str(args) + str(kwargs)).encode('utf-8')).hexdigest()
-            key = f"{prefix}_{func.__name__}_{sha}"
-
-            if result := provider.get(key):
+            if result := provider.get(func.__name__, args, kwargs):
                 return result
 
             result = func(*args, **kwargs)
-            provider.set(key, result, args=args, kwargs=kwargs)
+            provider.set(func.__name__, args, kwargs, result)
             return result
         return cast(F, wrapper)
     return decorator
