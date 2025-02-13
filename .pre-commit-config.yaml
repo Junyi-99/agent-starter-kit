@@ -8,6 +8,8 @@ repos:
     rev: v1.15.0
     hooks:
       - id: mypy
+        additional_dependencies:
+          - mypy-extensions
 
 
   - repo: https://github.com/psf/black

@@ -10,7 +10,7 @@ import pymupdf
 class ReferenceType(Enum):
     NUMBERED = (re.compile(r"\[\d+\].*(19|20)\d{2}(:?\.)"), "Numbered reference with year")
     AUTHOR_YEAR = (re.compile(r"^([A-Z][a-z]*.*)((19|20)\d{2}[a-z]?(:?\.)(:?\sdoi:.*\.)?|https?:\/\/\S+\.)"), "Author-year style")
-    
+
     def __init__(self, pattern: re.Pattern, description: str):
         self.pattern = pattern
         self.description = description
@@ -27,10 +27,10 @@ https?:\/\/\S+\. # Match http ending
 def classify_reference_type(block_text: str) -> ReferenceType | None:
     """
     Determine the reference style of a block of text
-    
+
     Args:
         block_text: str. The text to analyze
-    
+
     Returns:
         ReferenceType | None. The reference type if found, None otherwise
     """
@@ -44,10 +44,10 @@ def classify_reference_type(block_text: str) -> ReferenceType | None:
 def is_ref_block(block_text: str):
     """
     Check if a block of text is a reference block (e.g. "参考文献", "Reference", "Bibliography")
-    
+
     Args:
         block_text: str. The text to analyze
-    
+
     Returns:
         bool. True if the block is a reference block, False otherwise
     """
@@ -104,12 +104,10 @@ def mark_and_collect_references(page: pymupdf.Page, hit_ref_block=False):
 
 
 def count_references_on_page(page: pymupdf.Page, type: ReferenceType):
-    """
-    
-    """
+    """ """
     counter = 0
     for block in page.get_text("blocks"):
-        block_text = block[4].replace("\n", " ").replace("- ", "") # Block: (x,y,w,h,text,...,...)
+        block_text = block[4].replace("\n", " ").replace("- ", "")  # Block: (x,y,w,h,text,...,...)
         if type.pattern.match(block_text):
             counter += 1
     return counter
@@ -126,7 +124,7 @@ def get_all_refs(pdf_filepath: str, save_marked_pdf: bool = False) -> list[str] 
     Returns:
         list[str] | None: A list of extracted references if found, otherwise None.
     """
-    
+
     doc = pymupdf.open(pdf_filepath)
 
     ref_page_begin = get_ref_page(doc)
@@ -147,7 +145,7 @@ def get_all_refs(pdf_filepath: str, save_marked_pdf: bool = False) -> list[str] 
             block_text = block[4].replace("\n", " ").replace("- ", "")
             matches = [ref_type for ref_type in ReferenceType if ref_type.pattern.match(block_text)]
             ref_counter = ref_counter + Counter(matches)
-            
+
     major_ref_type, _ = ref_counter.most_common(1)[0]
 
     hit_ref_block = False
@@ -161,13 +159,13 @@ def get_all_refs(pdf_filepath: str, save_marked_pdf: bool = False) -> list[str] 
             break
         if refcnt != 0:
             ref_page_end = page.number
-        
+
         hit_ref_block, refs = mark_and_collect_references(page, hit_ref_block)  # mark the page's words
-        
-        blockcnt = len(page.get_text("blocks"))    
+
+        blockcnt = len(page.get_text("blocks"))
         if refcnt / blockcnt < 0.05:
             continue
-        
+
         all_refs.extend(refs)
 
     print(f"Major Reference type: {major_ref_type}")
@@ -175,7 +173,7 @@ def get_all_refs(pdf_filepath: str, save_marked_pdf: bool = False) -> list[str] 
 
     if save_marked_pdf:
         doc.save("marked-" + doc.name)
-    
+
     all_refs_finegrained = []  # Sometimes [] references stick together and need further splitting
     if major_ref_type == ReferenceType.NUMBERED:
         for ref in all_refs:
@@ -185,7 +183,7 @@ def get_all_refs(pdf_filepath: str, save_marked_pdf: bool = False) -> list[str] 
                     all_refs_finegrained.append("[" + r.strip())
     else:
         all_refs_finegrained = all_refs
-    
+
     return all_refs_finegrained
 
 
@@ -198,7 +196,7 @@ if __name__ == "__main__":
     parser.add_argument("--begin", type=int, help="Start page", default=0)
     parser.add_argument("--end", type=int, help="End page", default=-1)
     args = parser.parse_args()
-    
+
     refs = get_all_refs(args.filename)
     if refs is None:
         print("No references found, please check the PDF file")

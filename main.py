@@ -23,7 +23,7 @@ async def main():
     se = GoogleScholarSearchEngine()
 
     results = await se.search(
-        query="Dense Graph Convolutional With Joint Cross-Attention Network for Multimodal Emotion Recognition"
+        query="Dense Graph Convolutional With Joint Cross-Attention Network for Multimodal Emotion Recognition",
     )
     print_results(results)
 

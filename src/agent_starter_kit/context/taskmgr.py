@@ -1,5 +1,5 @@
-from concurrent.futures import ThreadPoolExecutor, as_completed, Future
-from typing import Callable, List, Any, TypeVar, Generic
+from concurrent.futures import Future, ThreadPoolExecutor, as_completed
+from typing import Any, Callable, Generic, List, TypeVar
 
 T = TypeVar("T")
 

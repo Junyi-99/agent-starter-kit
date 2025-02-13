@@ -11,6 +11,7 @@ class Author:
     orcid_id: str | None = None
     affiliation: str | None = None
     homepage: str | None = None
+
     def __str__(self):
         return self.full_name
 
@@ -23,9 +24,10 @@ class Author:
             "affiliation": self.affiliation,
             "homepage": self.homepage,
         }
-    
+
     def to_json(self) -> str:
         return json.dumps(self.to_dict())
+
 
 @dataclass
 class PaperSearchResult:
@@ -38,7 +40,7 @@ class PaperSearchResult:
     venue_url: str | None = None
     is_open_access: bool | None = None
     open_access_link: str | None = None  # URL to the PDF or Latex source. Only available if is_open_access is True
-    
+
     def to_dict(self) -> dict:
         return {
             "title": self.title,
@@ -61,7 +63,9 @@ class SearchEngine(ABC):
         super().__init__()
 
     @abstractmethod
-    async def search(self, query: str, year_from: int | None = None, year_to: int | None = None, offset: int | None = None, limit: int | None = None) -> list[PaperSearchResult]:
+    async def search(
+        self, query: str, year_from: int | None = None, year_to: int | None = None, offset: int | None = None, limit: int | None = None
+    ) -> list[PaperSearchResult]:
         """
         Search for papers based on a query.
 

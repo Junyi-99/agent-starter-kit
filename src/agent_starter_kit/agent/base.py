@@ -26,15 +26,15 @@ class Agent(ABC):
         self.name = name
         self.client = OpenAI()
         self.temperature = temperature  # OpenAI Temperature
-        self.top_p = top_p              # OpenAI Top P
+        self.top_p = top_p  # OpenAI Top P
         self.seed = seed
         self.langfuse = Langfuse(
             secret_key=os.getenv("LANGFUSE_SECRET_KEY", "sk-lf-fdd5a88c-94d6-4640-a789-51f20b4a5067"),
-            public_key=os.getenv("LANGFUSE_PUBLIC_KEY", "pk-lf-576d14cc-4003-4cb0-812b-146e6dc059fd"), # pd-org / development
-            host=os.getenv("LANGFUSE_HOST", "https://pd-trace-3.xtra.science")
+            public_key=os.getenv("LANGFUSE_PUBLIC_KEY", "pk-lf-576d14cc-4003-4cb0-812b-146e6dc059fd"),  # pd-org / development
+            host=os.getenv("LANGFUSE_HOST", "https://pd-trace-3.xtra.science"),
         )
         self.tracing = tracing
-        
+
         self.trace = self.langfuse.trace(
             name=self.name,
             tags=tags or [],
@@ -46,18 +46,19 @@ class Agent(ABC):
             output="Please check the Observation for GENERATION",
             metadata={
                 "hint": "Please check the Observation for GENERATION",
-            }
+            },
         )
 
     def run(
-            self, *,
-            prompt: str | object,
-            stream_callback: Callable[[str], None] | None = None,
-            model: str = "gpt-4o-mini",
-            response_format: Literal["text", "json_object"] = "text",
-            tags: list[str] | None = None,
-            metadata: dict | None = None,
-            debug: bool = False
+        self,
+        *,
+        prompt: str | object,
+        stream_callback: Callable[[str], None] | None = None,
+        model: str = "gpt-4o-mini",
+        response_format: Literal["text", "json_object"] = "text",
+        tags: list[str] | None = None,
+        metadata: dict | None = None,
+        debug: bool = False,
     ) -> str:
         """
         Generate a response from the given prompt.
@@ -81,11 +82,11 @@ class Agent(ABC):
             session_id=AGENT_STARTER_KIT_SESSION_ID,
             model=model,
             start_time=datetime.now(),
-            level="DEBUG" if debug else "DEFAULT"
+            level="DEBUG" if debug else "DEFAULT",
         )
 
         stream = self.client.chat.completions.create(
-            messages=[{"role": "user", "content": prompt}] if isinstance(prompt, str) else prompt, # type: ignore
+            messages=[{"role": "user", "content": prompt}] if isinstance(prompt, str) else prompt,  # type: ignore
             model=model,
             temperature=self.temperature,
             top_p=self.top_p,
