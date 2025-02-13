@@ -34,19 +34,20 @@ class Agent:
         )
         self.tracing = tracing
 
-        self.trace = self.langfuse.trace(
-            name=self.name,
-            tags=tags or [],
-            user_id=AGENT_STARTER_KIT_USER_ID,
-            session_id=AGENT_STARTER_KIT_SESSION_ID,
-            version=AGENT_STARTER_KIT_VERSION,
-            release=AGENT_STARTER_KIT_RELEASE,
-            input="Please check the Observation for GENERATION",
-            output="Please check the Observation for GENERATION",
-            metadata={
-                "hint": "Please check the Observation for GENERATION",
-            },
-        )
+        if self.tracing:
+            self.trace = self.langfuse.trace(
+                name=self.name,
+                tags=tags or [],
+                user_id=AGENT_STARTER_KIT_USER_ID,
+                session_id=AGENT_STARTER_KIT_SESSION_ID,
+                version=AGENT_STARTER_KIT_VERSION,
+                release=AGENT_STARTER_KIT_RELEASE,
+                input="Please check the Observation for GENERATION",
+                output="Please check the Observation for GENERATION",
+                metadata={
+                    "hint": "Please check the Observation for GENERATION",
+                },
+            )
 
     def run(
         self,
@@ -67,22 +68,23 @@ class Agent:
         @param tags: Tags for the observation (not the trace).
         @param metadata: tracing only. you can put any key-value pairs in it.
         """
-        trace_generate = self.trace.generation(
-            name="generate_response",
-            input=prompt,
-            metadata={
-                **(metadata or {}),
-                "temperature": self.temperature,
-                "top_p": self.top_p,
-                "seed": self.seed,
-            },
-            tags=(tags or []),
-            user_id=AGENT_STARTER_KIT_USER_ID,
-            session_id=AGENT_STARTER_KIT_SESSION_ID,
-            model=model,
-            start_time=datetime.now(),
-            level="DEBUG" if debug else "DEFAULT",
-        )
+        if self.tracing:
+            trace_generate = self.trace.generation(
+                name="generate_response",
+                input=prompt,
+                metadata={
+                    **(metadata or {}),
+                    "temperature": self.temperature,
+                    "top_p": self.top_p,
+                    "seed": self.seed,
+                },
+                tags=(tags or []),
+                user_id=AGENT_STARTER_KIT_USER_ID,
+                session_id=AGENT_STARTER_KIT_SESSION_ID,
+                model=model,
+                start_time=datetime.now(),
+                level="DEBUG" if debug else "DEFAULT",
+            )
 
         stream = self.client.chat.completions.create(
             messages=[{"role": "user", "content": prompt}] if isinstance(prompt, str) else prompt,  # type: ignore
@@ -103,6 +105,8 @@ class Agent:
                     stream_callback(content)
         output = "".join(collected)
 
-        self.trace.update(output=output)  # update the trace with the final output
-        trace_generate.update(output=output, end_time=datetime.now())
+        if self.tracing:
+            self.trace.update(output=output)  # update the trace with the final output
+            trace_generate.update(output=output, end_time=datetime.now())
+
         return output
