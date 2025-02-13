@@ -1,7 +1,7 @@
 [project]
 name = "agent-starter-kit"
 version = "0.1.0"
-description = "Add your description here"
+description = "Agent Starter Kit"
 readme = "README.md"
 authors = [
     { name = "Junyi Hou", email = "hji200914@gmail.com" }
@@ -17,6 +17,12 @@ dependencies = [
     "pymupdf>=1.25.3", # extract references
     "rich>=13.9.4", # better printing
 ]
+license = "MIT"
+license-files = ["LICEN[CS]E*"]
+[project.urls]
+Homepage = "https://github.com/Junyi-99/agent-starter-kit/"
+Issues = "https://github.com/Junyi-99/agent-starter-kit/issues"
+
 
 [[tool.mypy.overrides]]
 module = ["crawl4ai.*", "langfuse.*", "pymupdf.*"]

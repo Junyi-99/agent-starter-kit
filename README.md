@@ -4,15 +4,6 @@ This is a starter kit for building agents. It is a collection of tools and utili
 
 ## Installation
 
-### 0. Prerequisites
-
-We recommend using uv to install the dependencies.
-
-```bash
-wget -qO- https://astral.sh/uv/install.sh | sh # Install uv
-uv python install 3.13
-```
-
 ### 1. Clone the repository
 
 ```bash
@@ -23,15 +14,14 @@ cd agent-starter-kit
 ### 2. Install the dependencies
 
 ```bash
-uv venv # Create a virtual environment for the project
-source .venv/bin/activate
-
-uv sync # Install the dependencies
-uv run playwright install # Install playwright for web scraping
+conda create -n agent python=3.13
+conda activate agent
+pip install uv # we use uv as the package manager.
+uv pip install -r pyproject.toml # It's very fast.
 ```
 
 ### 3. Run the project
 
 ```bash
-uv run python main.py
+
 ```
