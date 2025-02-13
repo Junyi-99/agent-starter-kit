@@ -31,6 +31,7 @@ uv pip install -r pyproject.toml # It's very fast.
 ### Before Push
 
 ```bash
-python3 -m mypy src 
+pre-commit run --all-files
+python3 -m mypy src
 python3 -m ruff check
 ```
