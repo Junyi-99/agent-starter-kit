@@ -40,13 +40,15 @@ class SemanticScholarSearchEngine(SearchEngine):
         
         
         logger.info(ret.json())
-        if "code" in ret.json():
+        if "code" in ret.json(): # 429
             logger.error(ret.json())
             time.sleep(5)
+            raise Exception(f"Semantic Scholar API limit reached: {ret.json()}")
         elif "message" in ret.json():
             logger.error(ret.json())
             time.sleep(5)
-
+            raise Exception(f"Semantic Scholar API error: {ret.json()}")
+        
         if "data" in ret.json():
             data = ret.json()["data"]
             for paper in data:

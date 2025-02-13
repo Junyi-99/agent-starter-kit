@@ -102,12 +102,26 @@ def parse_google_scholar_html(html_content: str) -> list[PaperSearchResult]:
                 abstract = None # type: ignore
         else:
             authors = tree.xpath("//div[@class='gs_a']")
-            authors, venue_name, venue_url = authors[0].text_content().split('-') if len(authors) > 0 else (None, None, None) # type: ignore
+            print(authors[0].text_content().split('-'))
+            
+            temp = authors[0].text_content().split('-') if len(authors) > 0 else (None, None, None)
+            if len(temp) >= 3:
+                authors, venue_name, venue_url = temp[0], temp[-2], temp[-1]
+            else:
+                authors = authors[0].text_content() # type: ignore
+                venue_name = None
+                venue_url = None
+                
             authors = authors.split(",") # type: ignore
             authors = [Author(full_name=author.strip()) for author in authors] # type: ignore
             venue_url = venue_url.strip() if venue_url is not None else None # type: ignore
             
-            venue_name, year = venue_name.split(",") if venue_name is not None else (None, None)
+            temp = venue_name.split(",") if venue_name is not None else (None, None)
+            if len(temp) > 1:
+                venue_name, year = temp[0], temp[-1]
+            else:
+                venue_name = temp[0]
+                year = None
             venue_name = " ".join(venue_name.split()) if venue_name is not None else None # remove the \xa0 in the string
             year = int(year) if year is not None else None
             
@@ -168,7 +182,7 @@ class GoogleScholarSearchEngine(SearchEngine):
 
     async def _search(self, query: str, year_from: int | None, year_to: int | None, offset: int | None, limit: int | None) -> list[PaperSearchResult]:
         browser_cfg = BrowserConfig(
-            headless=False,
+            headless=True,
             user_agent_mode="random",
             cookies=[],
             use_persistent_context=True,
