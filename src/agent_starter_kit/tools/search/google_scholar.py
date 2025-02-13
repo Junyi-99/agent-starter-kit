@@ -3,7 +3,9 @@ import warnings
 
 import requests
 from bs4 import BeautifulSoup, Tag
-from crawl4ai import (AsyncWebCrawler, BrowserConfig, CacheMode,
+from crawl4ai import (AsyncWebCrawler, 
+                      BrowserConfig, 
+                      CacheMode,
                       CrawlerRunConfig)
 from crawl4ai.chunking_strategy import RegexChunking
 from lxml import etree, html

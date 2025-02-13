@@ -25,3 +25,11 @@ uv pip install -r pyproject.toml # It's very fast.
 ```bash
 
 ```
+
+## Contribution
+
+### Before Push
+
+```bash
+python3 -m mypy src 
+```
