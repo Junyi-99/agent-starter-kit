@@ -1,10 +1,12 @@
 import asyncio
 import warnings
+
 import requests
 from bs4 import BeautifulSoup, Tag
-from crawl4ai import AsyncWebCrawler, CacheMode, CrawlerRunConfig, BrowserConfig
+from crawl4ai import (AsyncWebCrawler, BrowserConfig, CacheMode,
+                      CrawlerRunConfig)
 from crawl4ai.chunking_strategy import RegexChunking
-from lxml import html, etree
+from lxml import etree, html
 from rich import print
 
 from .base import Author, PaperSearchResult, SearchEngine

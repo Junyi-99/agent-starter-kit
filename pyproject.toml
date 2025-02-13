@@ -16,6 +16,7 @@ dependencies = [
     "lxml-stubs>=0.5.1",
     "pymupdf>=1.25.3", # extract references
     "rich>=13.9.4", # better printing
+    "types-requests>=2.32.0.20241016",
 ]
 license = "MIT"
 license-files = ["LICEN[CS]E*"]

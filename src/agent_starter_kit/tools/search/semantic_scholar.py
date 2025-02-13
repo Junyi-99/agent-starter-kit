@@ -1,10 +1,12 @@
-from .base import Author, PaperSearchResult, SearchEngine
-import time
-import requests
 import json
-from rich import print
 import os
+import time
+
+import requests
 from loguru import logger
+from rich import print
+
+from .base import Author, PaperSearchResult, SearchEngine
 
 SEMANTIC_SCHOLAR_API_KEY = os.getenv("SEMANTIC_SCHOLAR_API_KEY", None)
 
