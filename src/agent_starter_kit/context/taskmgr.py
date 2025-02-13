@@ -6,13 +6,13 @@ T = TypeVar("T")
 
 class ConcurrentTaskManager(Generic[T]):
     def __init__(self, max_workers: int | None = None):
-        self.max_workers = max_workers
+        self._max_workers = max_workers
         self.executor = None
         self.futures: list[Future[T]] = []
         self.completed_futures: set[Future[T]] = set()
 
     def __enter__(self):
-        self.executor = ThreadPoolExecutor(max_workers=self.max_workers)
+        self.executor = ThreadPoolExecutor(max_workers=self._max_workers)
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
@@ -45,8 +45,3 @@ class ConcurrentTaskManager(Generic[T]):
                 except Exception as e:
                     print(f"Task generated an exception: {e}")
         return new_results
-
-    def wait(self):
-        """Wait for all tasks to complete"""
-        for future in as_completed(self.futures):
-            pass

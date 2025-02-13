@@ -198,7 +198,11 @@ class GoogleScholarSearchEngine(SearchEngine):
         self, query: str, year_from: int | None = None, year_to: int | None = None, offset: int | None = None, limit: int | None = None
     ) -> list[PaperSearchResult]:
         if limit is not None:
-            warnings.warn("The limit is not supported for Google Scholar search engine", UserWarning)
+            warnings.warn(
+                message="The limit is not supported for Google Scholar search engine",
+                category=UserWarning,
+                stacklevel=2,
+            )
         return await self._search(query, year_from, year_to, offset, limit)
 
 

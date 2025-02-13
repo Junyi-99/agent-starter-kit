@@ -120,7 +120,7 @@ def get_all_refs(pdf_filepath: str, save_marked_pdf: bool = False) -> list[str] 
     determines the major reference type, and collects all references. Optionally, it can save a marked version of the PDF.
     Args:
         pdf_filepath (str): The path to the PDF file.
-        save_marked_pdf (bool, optional): If True, saves a marked version of the PDF with references highlighted. Defaults to False. (This is useful for debugging.)
+        save_marked_pdf (bool, optional): If True, saves a marked version of the PDF with references highlighted. Defaults to False.
     Returns:
         list[str] | None: A list of extracted references if found, otherwise None.
     """

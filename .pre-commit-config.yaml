@@ -10,6 +10,7 @@ repos:
       - id: mypy
         additional_dependencies:
           - mypy-extensions
+          - types-requests
 
 
   - repo: https://github.com/psf/black

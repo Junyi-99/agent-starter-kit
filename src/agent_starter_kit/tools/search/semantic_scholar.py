@@ -47,7 +47,8 @@ class SemanticScholarSearchEngine(SearchEngine):
                 # "fieldsOfStudy": "Computer Science",
                 "limit": limit,
                 "offset": offset,
-                "fields": "paperId,title,authors,externalIds,year,abstract,referenceCount,citationCount,venue,publicationVenue,isOpenAccess,openAccessPdf,tldr",
+                "fields": "paperId,title,authors,externalIds,year,abstract,referenceCount,"
+                "citationCount,venue,publicationVenue,isOpenAccess,openAccessPdf,tldr",
             },
             headers=headers,
         )
@@ -71,11 +72,11 @@ class SemanticScholarSearchEngine(SearchEngine):
                         authors=[
                             Author(
                                 full_name=author["name"],
-                                google_scholar_id=author.get("externalIds", {}).get("googleScholarId", None),
-                                dblp_id=author.get("externalIds", {}).get("DBLP", None),
-                                orcid_id=author.get("externalIds", {}).get("ORCID", None),
+                                google_scholar_id=author.get("externalIds", {}).get("googleScholarId"),
+                                dblp_id=author.get("externalIds", {}).get("DBLP"),
+                                orcid_id=author.get("externalIds", {}).get("ORCID"),
                                 affiliation=str(author.get("affiliations", [])),
-                                homepage=author.get("homepage", None),
+                                homepage=author.get("homepage"),
                             )
                             for author in paper["authors"]
                         ],
@@ -104,11 +105,7 @@ class SemanticScholarSearchEngine(SearchEngine):
                 },
             )
 
-            if "code" in ret.json():
-                print(ret.json())
-                time.sleep(5)
-                continue
-            elif "message" in ret.json():
+            if "code" in ret.json() or "message" in ret.json():
                 print(ret.json())
                 time.sleep(5)
                 continue

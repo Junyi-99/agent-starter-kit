@@ -6,4 +6,5 @@ def parse_tag(tag: str, llm_response: str) -> str:
     """
     pos1 = llm_response.find(f"<{tag}>")
     pos2 = llm_response.find(f"</{tag}>", pos1)
-    return llm_response[pos1 + len(tag) + 2 : pos2]
+    left = pos1 + len(tag) + 2
+    return llm_response[left:pos2]

@@ -1,6 +1,5 @@
 import os
 import socket
-from abc import ABC
 from datetime import datetime
 from typing import Callable, Literal
 
@@ -14,7 +13,7 @@ AGENT_STARTER_KIT_USER_ID = os.getenv("AGENT_STARTER_KIT_USER_ID", socket.gethos
 AGENT_STARTER_KIT_SESSION_ID = os.getenv("AGENT_STARTER_KIT_SESSION_ID", "unspecified")  # Equal to the job-id of the backend
 
 
-class Agent(ABC):
+class Agent:
     """
     Every Agent has its own trace, which records all operations.
     """
