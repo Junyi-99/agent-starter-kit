@@ -3,14 +3,14 @@ import asyncio
 from rich import print
 
 import agent_starter_kit
-from agent_starter_kit.tools.search import (GoogleScholarSearchEngine,
-                                            PaperSearchResult)
+from agent_starter_kit.tools.search import GoogleScholarSearchEngine, PaperSearchResult
 
 
 def print_results(results: list[PaperSearchResult]):
     for result in results:
-        print(f"Title=\"{result.title}\"")
-        print(f"    Authors={', '.join([author.full_name for author in result.authors])}")
+        authors = ", ".join([author.full_name for author in result.authors])
+        print(f'Title="{result.title}"')
+        print(f"    Authors={authors}")
         print(f"    Year={result.year}")
         print(f"    CitedBy={result.citation_count}")
         print(f"    Venue={result.venue_name} ({result.venue_url})")
