@@ -54,8 +54,6 @@ class SemanticScholarSearchEngine(SearchEngine):
         if "data" in ret.json():
             data = ret.json()["data"]
             for paper in data:
-                paper_id = paper["paperId"]
-                title = paper["title"]
                 result.append(
                     PaperSearchResult(
                         title=paper["title"],
@@ -87,7 +85,14 @@ class SemanticScholarSearchEngine(SearchEngine):
     
     def paper_citations(self, paper_id: str, limit: int = 1000, offset: int = 0) -> list[dict]:
         while True:
-            ret = requests.get(f"https://api.semanticscholar.org/graph/v1/paper/{paper_id}/citations", params={"fields": "paperId,title,year,abstract", "limit": limit, offset: offset})
+            ret = requests.get(
+                url=f"https://api.semanticscholar.org/graph/v1/paper/{paper_id}/citations", 
+                params={
+                    "fields": "paperId,title,year,abstract", 
+                    "limit": str(limit), 
+                    "offset": str(offset)
+                }
+            )
 
             if "code" in ret.json():
                 print(ret.json())

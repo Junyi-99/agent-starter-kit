@@ -6,7 +6,6 @@ from typing import Callable, Literal
 
 from langfuse import Langfuse
 from openai import OpenAI
-from openai.types.chat import ChatCompletionMessageParam
 
 AGENT_STARTER_KIT_VERSION = os.getenv("AGENT_STARTER_KIT_VERSION", "unknown")
 AGENT_STARTER_KIT_RELEASE = os.getenv("AGENT_STARTER_KIT_RELEASE", "unknown")  # e.g. Nov 16, 2024 18:53

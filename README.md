@@ -32,4 +32,5 @@ uv pip install -r pyproject.toml # It's very fast.
 
 ```bash
 python3 -m mypy src 
+python3 -m ruff check
 ```

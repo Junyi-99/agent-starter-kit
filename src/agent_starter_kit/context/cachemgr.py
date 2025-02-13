@@ -1,11 +1,11 @@
-from functools import wraps
-import os
-from hashlib import sha256
 import json
-from typing import Any, Callable, TypeVar, Optional, Protocol, ParamSpec, cast
+import os
 from dataclasses import dataclass
 from datetime import datetime
-from collections.abc import Callable
+from functools import wraps
+from hashlib import sha256
+from typing import Any, Callable, Optional, Protocol, cast
+
 
 class CacheInterface(Protocol):
     def get(self, func_name: str, args: tuple, kwargs: dict) -> Optional[Any]: ...

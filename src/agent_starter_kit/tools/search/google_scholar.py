@@ -84,8 +84,8 @@ def parse_google_scholar_html(html_content: str) -> list[PaperSearchResult]:
                     
                     authors = [
                         Author(
-                            full_name= author_name,
-                            google_scholar_id=author_id
+                            full_name=str(author_name),
+                            google_scholar_id=str(author_id)
                     )
                     for author in authors
                 ]
@@ -240,3 +240,9 @@ async def get_all_paper_year_till_now(keyword: str, fromyear: int) -> list[Paper
         query=keyword,
         year_from=fromyear
     )
+
+
+if __name__ == "__main__":
+    asyncio.run(get_search_result_googlescholar("machine learning", 1))
+    asyncio.run(get_all_paper("machine learning"))
+    asyncio.run(get_all_paper_year_till_now("machine learning", 2020))

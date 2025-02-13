@@ -1,1 +1,1 @@
-from .base import Agent
+from .base import Agent as Agent
