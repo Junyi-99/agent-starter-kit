@@ -27,25 +27,27 @@ class Agent:
         self.temperature = temperature  # OpenAI Temperature
         self.top_p = top_p  # OpenAI Top P
         self.seed = seed
-        self.langfuse = Langfuse(
-            secret_key=os.getenv("LANGFUSE_SECRET_KEY", "sk-lf-fdd5a88c-94d6-4640-a789-51f20b4a5067"),
-            public_key=os.getenv("LANGFUSE_PUBLIC_KEY", "pk-lf-576d14cc-4003-4cb0-812b-146e6dc059fd"),  # pd-org / development
-            host=os.getenv("LANGFUSE_HOST", "https://pd-trace-3.xtra.science"),
-        )
-        self.tracing = tracing
+        self._is_first_run = True
 
-        if self.tracing:
-            self.trace = self.langfuse.trace(
+        self._trace = None
+
+        if tracing:
+            self._langfuse = Langfuse(
+                secret_key=os.getenv("LANGFUSE_SECRET_KEY", "sk-lf-fdd5a88c-94d6-4640-a789-51f20b4a5067"),
+                public_key=os.getenv("LANGFUSE_PUBLIC_KEY", "pk-lf-576d14cc-4003-4cb0-812b-146e6dc059fd"),  # pd-org / development
+                host=os.getenv("LANGFUSE_HOST", "https://pd-trace-3.xtra.science"),
+            )
+            self._trace = self._langfuse.trace(
                 name=self.name,
                 tags=tags or [],
                 user_id=AGENT_STARTER_KIT_USER_ID,
                 session_id=AGENT_STARTER_KIT_SESSION_ID,
                 version=AGENT_STARTER_KIT_VERSION,
                 release=AGENT_STARTER_KIT_RELEASE,
-                input="Please check the Observation for GENERATION",
-                output="Please check the Observation for GENERATION",
+                input="Please check the Observation for GENERATION input",
+                output="Please check the Observation for GENERATION output",
                 metadata={
-                    "hint": "Please check the Observation for GENERATION",
+                    "hint": "Please check the Observation for GENERATION metadata",
                 },
             )
 
@@ -68,8 +70,13 @@ class Agent:
         @param tags: Tags for the observation (not the trace).
         @param metadata: tracing only. you can put any key-value pairs in it.
         """
-        if self.tracing:
-            trace_generate = self.trace.generation(
+
+        if self._trace and self._is_first_run:
+            self._is_first_run = False
+            self._trace.update(input=prompt)
+
+        if self._trace:
+            trace_generate = self._trace.generation(
                 name="generate_response",
                 input=prompt,
                 metadata={
@@ -105,8 +112,8 @@ class Agent:
                     stream_callback(content)
         output = "".join(collected)
 
-        if self.tracing:
-            self.trace.update(output=output)  # update the trace with the final output
+        if self._trace:
+            self._trace.update(output=output)  # update the trace with the latest output
             trace_generate.update(output=output, end_time=datetime.now())
 
         return output

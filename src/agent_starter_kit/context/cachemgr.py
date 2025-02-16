@@ -1,5 +1,6 @@
 import json
 import os
+import warnings
 from dataclasses import dataclass
 from datetime import datetime
 from functools import wraps
@@ -49,9 +50,13 @@ class CacheManager:
     def get(self, func_name: str, args: tuple | None, kwargs: dict | None) -> Optional[Any]:
         path = self.get_cache_path(func_name, args, kwargs)
         if os.path.exists(path):
-            with open(path, "r") as f:
-                data = json.load(f)
-                return data["result"]
+            try:
+                with open(path, "r") as f:
+                    data = json.load(f)
+                    return data["result"]
+            except json.JSONDecodeError:
+                warnings.warn(f"cache file corrupted: {path}, deleting it", stacklevel=2)
+                os.remove(path)
         return None
 
     def set(self, func_name: str, args: tuple | None = None, kwargs: dict | None = None, return_value: Any = None) -> None:

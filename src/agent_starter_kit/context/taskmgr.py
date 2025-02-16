@@ -5,7 +5,7 @@ T = TypeVar("T")
 
 
 class ConcurrentTaskManager(Generic[T]):
-    def __init__(self, max_workers: int | None = None):
+    def __init__(self, max_workers: int | None = 2):
         self._max_workers = max_workers
         self.executor = None
         self.futures: list[Future[T]] = []
