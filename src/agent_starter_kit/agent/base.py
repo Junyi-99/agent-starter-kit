@@ -50,6 +50,7 @@ class Agent:
                     "hint": "Please check the Observation for GENERATION metadata",
                 },
             )
+        self.last_response: str | None = None
 
     def run(
         self,
@@ -110,10 +111,32 @@ class Agent:
                 collected.append(content)
                 if stream_callback is not None:
                     stream_callback(content)
-        output = "".join(collected)
+        response = "".join(collected)
+        self.last_response = response
 
         if self._trace:
-            self._trace.update(output=output)  # update the trace with the latest output
-            trace_generate.update(output=output, end_time=datetime.now())
+            self._trace.update(output=response)  # update the trace with the latest output
+            trace_generate.update(output=response, end_time=datetime.now())
+        return response
 
-        return output
+    def parse(self, tag: str) -> str:
+        """
+        Parse the tag in LLM's response.
+
+        This function can only parse the tag enclosed by "<>".
+
+        For example, if `tag` is "REASONING", it will return the text between "<REASONING>" and "</REASONING>".
+        """
+        if self.last_response is None:
+            raise ValueError("No response to parse")
+
+        pos1 = self.last_response.find(f"<{tag}>")
+        if pos1 == -1:
+            raise ValueError(f"Tag {tag} not found in response")
+
+        pos2 = self.last_response.find(f"</{tag}>", pos1)
+        if pos2 == -1:
+            raise ValueError(f"Tag {tag} not closed in response")
+
+        left = pos1 + len(tag) + 2
+        return self.last_response[left:pos2]
